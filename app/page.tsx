@@ -9,6 +9,7 @@ import { LandingPage } from '@/components/LandingPage';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { AIChatbot } from '@/components/AIChatbot';
 import { Navbar } from '@/components/Navbar';
+import { MultilingualDemo } from '@/components/MultilingualDemo';
 
 export default function Home() {
   const { user, loading } = useAuth();

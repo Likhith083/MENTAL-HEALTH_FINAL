@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { getMoodEmoji, getMoodColor, getMoodLabel, formatDate } from '@/lib/utils';
 import { DashboardStats } from '@/types';
+import { MultilingualDemo } from '@/components/MultilingualDemo';
 import Link from 'next/link';
 
 export function Dashboard() {
@@ -434,6 +435,11 @@ export function Dashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+        
+        {/* Multilingual Voice Demo Section */}
+        <div className="mt-8">
+          <MultilingualDemo />
         </div>
       </div>
     </div>

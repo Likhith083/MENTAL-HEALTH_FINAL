@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthProvider';
 import { toast } from 'react-hot-toast';
+import { audioService, VoiceSettings } from '@/lib/audio-service';
+import { VoiceSettings as VoiceSettingsComponent } from '@/components/VoiceSettings';
 
 interface VoiceMessage {
   id: string;
@@ -46,7 +48,9 @@ export function VoiceChatbot({ isOpen, onClose }: VoiceChatbotProps) {
   const [isInCall, setIsInCall] = useState(false);
   const [selectedModel, setSelectedModel] = useState('llama3.1:latest');
   const [showSettings, setShowSettings] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [crisisDetected, setCrisisDetected] = useState(false);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(audioService.getDefaultSettings());
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -175,22 +179,15 @@ export function VoiceChatbot({ isOpen, onClose }: VoiceChatbotProps) {
     }
   };
 
-  const speakText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      // Stop any current speech
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
-      
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      
-      synthesisRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+  const speakText = async (text: string) => {
+    if (!isMuted) {
+      await audioService.speak(
+        text,
+        voiceSettings,
+        () => setIsSpeaking(true),
+        () => setIsSpeaking(false),
+        () => setIsSpeaking(false)
+      );
     }
   };
 
@@ -308,14 +305,25 @@ export function VoiceChatbot({ isOpen, onClose }: VoiceChatbotProps) {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700">Voice Output</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsMuted(!isMuted)}
-                      className={isMuted ? 'text-gray-500' : 'text-primary-600'}
-                    >
-                      {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowVoiceSettings(true)}
+                        className="text-primary-600"
+                        title="Voice Settings"
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsMuted(!isMuted)}
+                        className={isMuted ? 'text-gray-500' : 'text-primary-600'}
+                      >
+                        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
                   <Button
                     variant="outline"
@@ -444,6 +452,13 @@ export function VoiceChatbot({ isOpen, onClose }: VoiceChatbotProps) {
             </Card>
           </div>
         )}
+
+        {/* Voice Settings Modal */}
+        <VoiceSettingsComponent
+          isOpen={showVoiceSettings}
+          onClose={() => setShowVoiceSettings(false)}
+          onSettingsChange={setVoiceSettings}
+        />
       </div>
     );
   }
