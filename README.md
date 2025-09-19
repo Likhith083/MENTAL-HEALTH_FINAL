@@ -59,8 +59,9 @@ A comprehensive mental health web application built with Next.js, TypeScript, an
    
    **Edit `.env.local` with your configuration:**
    ```env
-   # Database (Required)
+   # Database
    MONGODB_URI=mongodb://localhost:27017/mental-health-app
+   # or for MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/mental-health-app
    
    # Authentication (Required)
    NEXTAUTH_SECRET=your-secret-key-here
